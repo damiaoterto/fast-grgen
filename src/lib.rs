@@ -7,6 +7,8 @@ use qrcode_generator::QrCodeEcc;
 use napi::bindgen_prelude::*;
 use base64::{Engine as _, engine::general_purpose};
 
+const DEFAULT_RENDER_SIZE: u32 = 1024;
+
 #[napi]
 pub enum QRCorrectionLevel {
 	Low,
@@ -47,10 +49,16 @@ impl QrGen {
   pub async fn to_file(options: QrCodeOptions, path: String) -> Result<()> {
     png_to_file(options, path)
   }
+
+  #[napi]
+  pub async fn to_svg(options: QrCodeOptions) -> Result<String> {
+    let result = svg_to_string(options);
+    Ok(result)
+  }
 }
 
 fn png_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
-  let size = options.size.unwrap_or(1024) as usize;
+  let size = options.size.unwrap_or(DEFAULT_RENDER_SIZE) as usize;
   let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
   
   let result = qrcode_generator::to_png_to_vec(
@@ -63,7 +71,7 @@ fn png_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
 }
 
 fn png_to_file(options: QrCodeOptions, path: String) -> Result<()> {
-  let size = options.size.unwrap_or(1024) as usize;
+  let size = options.size.unwrap_or(DEFAULT_RENDER_SIZE) as usize;
   let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
 
   qrcode_generator::to_png_to_file(
@@ -74,6 +82,18 @@ fn png_to_file(options: QrCodeOptions, path: String) -> Result<()> {
   ).unwrap();
 
   Ok(())
+}
+
+fn svg_to_string(options: QrCodeOptions) -> String {
+  let size = options.size.unwrap_or(DEFAULT_RENDER_SIZE) as usize;
+  let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
+
+  qrcode_generator::to_svg_to_string(
+    options.data, 
+    From::from(ecc), 
+    size, 
+    None::<&str>
+  ).unwrap()
 }
 
 impl From<QRCorrectionLevel> for QrCodeEcc {
