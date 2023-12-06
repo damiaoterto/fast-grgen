@@ -18,7 +18,7 @@ pub enum QRCorrectionLevel {
 #[napi(object)]
 pub struct QrCodeOptions {
   pub data: String,
-  pub ecc: QRCorrectionLevel,
+  pub ecc: Option<QRCorrectionLevel>,
   pub size: Option<u32>
 }
 
@@ -34,7 +34,7 @@ impl QrGen {
     let mime_type = "image/png";
     let base64_encoded = general_purpose::STANDARD_NO_PAD.encode(result);
 
-    Ok(format!("data:{},base64,{}", mime_type, base64_encoded))
+    Ok(format!("data:{};base64,{}", mime_type, base64_encoded))
   }
 
   #[napi]
@@ -51,10 +51,11 @@ impl QrGen {
 
 fn png_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
   let size = options.size.unwrap_or(1024) as usize;
+  let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
   
   let result = qrcode_generator::to_png_to_vec(
       options.data, 
-      From::from(options.ecc), 
+      From::from(ecc), 
       size
     ).unwrap();
 
@@ -63,10 +64,11 @@ fn png_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
 
 fn png_to_file(options: QrCodeOptions, path: String) -> Result<()> {
   let size = options.size.unwrap_or(1024) as usize;
+  let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
 
   qrcode_generator::to_png_to_file(
     options.data, 
-    From::from(options.ecc), 
+    From::from(ecc), 
     size, 
     path,
   ).unwrap();

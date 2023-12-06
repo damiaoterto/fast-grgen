@@ -1,0 +1,18 @@
+{
+  "name": "fast-qrgen-darwin-x64",
+  "version": "0.0.0",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "main": "fast-qrgen.darwin-x64.node",
+  "files": [
+    "fast-qrgen.darwin-x64.node"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">= 10"
+  }
+}
