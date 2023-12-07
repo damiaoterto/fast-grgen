@@ -131,10 +131,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: Config Yarn
-        run: |
-          yarn init -2
-          yarn set version
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
@@ -164,12 +160,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
-
-      - name: Config Yarn
-        run: |
-          yarn init -2
-          yarn set version
-      
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
