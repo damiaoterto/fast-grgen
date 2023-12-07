@@ -1,6 +1,6 @@
 {
   "name": "fast-qrgen-win32-x64-msvc",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "repository": {
     "url": "https://github.com/damiaoterto/fast-grgen"
   },
