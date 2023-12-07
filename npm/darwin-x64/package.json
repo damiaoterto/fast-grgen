@@ -1,6 +1,9 @@
 {
   "name": "fast-qrgen-darwin-x64",
   "version": "0.0.0",
+  "repository": {
+    "url": "https://github.com/damiaoterto/fast-grgen"
+  },
   "os": [
     "darwin"
   ],

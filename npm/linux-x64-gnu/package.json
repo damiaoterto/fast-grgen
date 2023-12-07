@@ -1,6 +1,9 @@
 {
   "name": "fast-qrgen-linux-x64-gnu",
   "version": "0.0.0",
+  "repository": {
+    "url": "https://github.com/damiaoterto/fast-grgen"
+  },
   "os": [
     "linux"
   ],
