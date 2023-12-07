@@ -220,6 +220,7 @@ jobs:
       - test-linux-aarch64-gnu-binding
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup node
         uses: actions/setup-node@v4
         with:
@@ -227,12 +228,15 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install
+
       - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
           path: artifacts
+
       - name: Move artifacts
         run: yarn artifacts
+
       - name: List packages
         run: ls -R ./npm
         shell: bash
