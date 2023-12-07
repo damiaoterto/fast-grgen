@@ -1,8 +1,11 @@
 {
   "name": "fast-qrgen",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.js",
   "types": "index.d.ts",
+  "repository": {
+    "url": "https://github.com/damiaoterto/fast-grgen"
+  },
   "napi": {
     "name": "fast-qrgen",
     "triples": {
