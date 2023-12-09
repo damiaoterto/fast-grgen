@@ -6,6 +6,7 @@ extern crate napi_derive;
 use qrcode_generator::QrCodeEcc;
 use napi::bindgen_prelude::*;
 use base64::{Engine as _, engine::general_purpose};
+use image_convert::{ ImageResource, to_jpg, JPGConfig };
 
 const DEFAULT_RENDER_SIZE: u32 = 1024;
 
@@ -17,10 +18,18 @@ pub enum QRCorrectionLevel {
 	High,
 }
 
+#[napi]
+pub enum QrImagesType {
+  JPG,
+  GIF,
+  PNG,
+}
+
 #[napi(object)]
 pub struct QrCodeOptions {
   pub data: String,
   pub ecc: Option<QRCorrectionLevel>,
+  pub ext: Option<QrImagesType>,
   pub size: Option<u32>
 }
 
@@ -31,9 +40,10 @@ pub struct QrGen {}
 impl QrGen {
   #[napi]
   pub async fn to_url(options: QrCodeOptions) -> Result<String> {
-    let result = png_to_vec(options).unwrap();
+    let result = img_to_vec(options).unwrap();
+    let ext = options.ext.unwrap_or(QrImagesType::PNG);
 
-    let mime_type = "image/png";
+    let mime_type = ext.as_mime_type();
     let base64_encoded = general_purpose::STANDARD_NO_PAD.encode(result);
 
     Ok(format!("data:{};base64,{}", mime_type, base64_encoded))
@@ -41,7 +51,7 @@ impl QrGen {
 
   #[napi]
   pub async fn to_buff(options: QrCodeOptions) -> Result<Buffer> {
-    let result = png_to_vec(options).unwrap();
+    let result = img_to_vec(options).unwrap();
     Ok(result.into())
   }
 
@@ -57,17 +67,20 @@ impl QrGen {
   }
 }
 
-fn png_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
+fn img_to_vec(options: QrCodeOptions) -> Result<Vec<u8>> {
   let size = options.size.unwrap_or(DEFAULT_RENDER_SIZE) as usize;
   let ecc = options.ecc.unwrap_or(QRCorrectionLevel::Low);
+  let ext = options.ext.unwrap_or(QrImagesType::PNG);
   
-  let result = qrcode_generator::to_png_to_vec(
+  let result = qrcode_generator::to_image(
       options.data, 
       From::from(ecc), 
       size
     ).unwrap();
 
-  Ok(result)
+  let image = convert_image(result, ext.as_mime_type());
+
+  Ok(image)
 }
 
 fn png_to_file(options: QrCodeOptions, path: String) -> Result<()> {
@@ -96,6 +109,17 @@ fn svg_to_string(options: QrCodeOptions) -> String {
   ).unwrap()
 }
 
+fn convert_image(vec: Vec<u8>, mime: &str) -> Vec<u8> {
+  let mut output = None;
+  let mut input = ImageResource::from_reader(vec);
+
+  match mime {
+    "image/jpeg" => to_jpg(output, input, &JPGConfig::new())
+  };
+
+  output.unwrap()
+}
+
 impl From<QRCorrectionLevel> for QrCodeEcc {
     fn from(level: QRCorrectionLevel) -> Self {
         match level {
@@ -105,4 +129,15 @@ impl From<QRCorrectionLevel> for QrCodeEcc {
             QRCorrectionLevel::High => QrCodeEcc::High,
         }
     }
+}
+
+impl QrImagesType {
+  fn as_mime_type(&self) -> &str {
+    match self {
+      QrImagesType::JPEG => "image/jpeg",
+      QrImagesType::JPG => "image/jpg",
+      QrImagesType::GIF => "image/gif",
+      QrImagesType::PNG => "image/png",
+    }
+  }
 }
